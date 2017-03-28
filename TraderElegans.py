@@ -42,7 +42,7 @@ class Data:
     def get_out_file_name(self):
         return self.out_file
 
-    def prepare_data(self):
+    def transform_data_file(self):
         for year in range(self.constants.start_y, self.constants.end_y + 1):
 
             if year == self.constants.end_y:
@@ -122,4 +122,6 @@ def read_data(file):
 
 
 #MAIN-------------------------------------------------------------------------------------------------------------------
-Data(Constants()).prepare_data()
+data = Data(Constants())
+#data.transform_data_file()
+raw_data = read_dat(data.get_out_file_name())
