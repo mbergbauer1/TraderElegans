@@ -4,14 +4,12 @@ file_ext = '.csv'
 filename_EURUSD = 'DAT_ASCII_EURUSD_M1_'
 filename_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
 filename_USDCHF = 'DAT_ASCII_USDCHF_M1_'
-start_y = 2000
+start_y = 2001
 end_y = 2017
 end_m = 3
 start_time = 80000
 end_time = 120000
 #-----------------------------------------------------------------------------------------------------------------------
-
-
 files = [filename_EURUSD, filename_GBPUSD, filename_USDCHF]
 
 if end_m is None:
