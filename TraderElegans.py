@@ -112,10 +112,10 @@ class Data:
 #FUNCTIONS--------------------------------------------------------------------------------------------------------------
 def read_data(file):
     raw_data = []
-    f1 = open(file, 'r')
-    for line in f1:
+    f = open(file, 'r')
+    for line in f:
         tmp = line[:8] + ',' + line[8:]
-
+        raw_data.append(tmp)
     return raw_data
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -124,4 +124,8 @@ def read_data(file):
 #MAIN-------------------------------------------------------------------------------------------------------------------
 data = Data(Constants())
 #data.transform_data_file()
-raw_data = read_dat(data.get_out_file_name())
+print(data.get_out_file_name())
+#raw_data = read_data(data.get_out_file_name())
+f = open(data.get_out_file_name(), 'r')
+for line in f:
+    pass
