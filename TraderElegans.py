@@ -34,7 +34,6 @@ class Data:
             self.out_file = constants.file_path + 'training_set_' + str(constants.start_y) + '_' + str(constants.end_y) + str(constants.end_m).zfill(2) + '_' + str(
                 constants.start_time) + '_' + str(constants.end_time) + '.txt'
 
-        self.out = open(self.out_file, 'w')
         self.EURUSD = {}
         self.GBPUSD = {}
         self.USDCHF = {}
@@ -43,6 +42,7 @@ class Data:
         return self.out_file
 
     def transform_data_file(self):
+        self.out = open(self.out_file, 'w')
         for year in range(self.constants.start_y, self.constants.end_y + 1):
 
             if year == self.constants.end_y:
@@ -109,6 +109,7 @@ class Data:
             tmp = tmp.replace(" ", "")
             tmp = tmp + '\n'
             self.out.write(tmp)
+        self.out.close()
 #FUNCTIONS--------------------------------------------------------------------------------------------------------------
 def read_data(file):
     raw_data = []
@@ -125,7 +126,7 @@ def read_data(file):
 data = Data(Constants())
 #data.transform_data_file()
 print(data.get_out_file_name())
-#raw_data = read_data(data.get_out_file_name())
-f = open(data.get_out_file_name(), 'r')
-for line in f:
-    pass
+raw_data = read_data(data.get_out_file_name())
+
+pass
+
