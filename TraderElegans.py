@@ -121,16 +121,13 @@ def read_data(file):
         day = line[:8]
         tmp = line[8:]
         if day == prevday:
-            raw_data[countday].append(tmp)
+            tmp = str(countday) + ',' + tmp
+            raw_data.append(tmp)
         else:
             countday += 1
-            raw_data[countday].append(tmp)
+            tmp = str(countday) + ',' + tmp
+            raw_data.append(tmp)
         prevday = day
-
-
-
-
-
     return raw_data
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -144,3 +141,6 @@ raw_data = read_data(data.get_out_file_name())
 
 pass
 
+print(raw_data[0][0])
+
+pass
