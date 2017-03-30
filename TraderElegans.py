@@ -11,12 +11,13 @@ from sklearn.metrics import mean_squared_error
 #CLASSES----------------------------------------------------------------------------------------------------------------
 class Constants:
     #Class Variables (static)
-    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
+#    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
+    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
     file_ext = '.csv'
     filename_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     filename_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
     filename_USDCHF = 'DAT_ASCII_USDCHF_M1_'
-    start_y = 2001
+    start_y = 2000
     end_y = 2017
     end_m = 3
     start_time = 80000
@@ -114,9 +115,22 @@ class Data:
 def read_data(file):
     raw_data = []
     f = open(file, 'r')
+    countday = 0
+    prevday = ''
     for line in f:
-        tmp = line[:8] + ',' + line[8:]
-        raw_data.append(tmp)
+        day = line[:8]
+        tmp = line[8:]
+        if day == prevday:
+            raw_data[countday].append(tmp)
+        else:
+            countday += 1
+            raw_data[countday].append(tmp)
+        prevday = day
+
+
+
+
+
     return raw_data
 
 #-----------------------------------------------------------------------------------------------------------------------
