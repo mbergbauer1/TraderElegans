@@ -11,8 +11,8 @@ from sklearn.metrics import mean_squared_error
 #CLASSES----------------------------------------------------------------------------------------------------------------
 class Constants:
     #Class Variables (static)
-#    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
-    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
+    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
+#    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
     file_ext = '.csv'
     filename_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     filename_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
@@ -111,6 +111,14 @@ class Data:
             tmp = tmp + '\n'
             self.out.write(tmp)
         self.out.close()
+# ----------------------------------------------------------------------------------------------------------------------
+class OneDayRawData:
+    def __init__(self):
+        self.data = []
+    def add(self,record):
+        self.data.append(record)
+    def get(self):
+        return self.data
 #FUNCTIONS--------------------------------------------------------------------------------------------------------------
 def read_data(file):
     raw_data = []
@@ -122,11 +130,11 @@ def read_data(file):
         tmp = line[8:]
         if day == prevday:
             tmp = str(countday) + ',' + tmp
-            raw_data.append(tmp)
+            raw_data.append(tmp.split(','))
         else:
             countday += 1
             tmp = str(countday) + ',' + tmp
-            raw_data.append(tmp)
+            raw_data.append(tmp.split(","))
         prevday = day
     return raw_data
 
@@ -139,8 +147,6 @@ data = Data(Constants())
 print(data.get_out_file_name())
 raw_data = read_data(data.get_out_file_name())
 
-pass
-
-print(raw_data[0][0])
+print(raw_data[1])
 
 pass
