@@ -11,8 +11,8 @@ from sklearn.metrics import mean_squared_error
 #CLASSES----------------------------------------------------------------------------------------------------------------
 class Constants:
     #Class Variables (static)
-    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
-#    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
+#    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
+    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
     file_ext = '.csv'
     filename_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     filename_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
@@ -22,6 +22,9 @@ class Constants:
     end_m = 3
     start_time = 80000
     end_time = 120000
+    create_scaled = False
+    lookback = 20
+    lookahead = 10
 #-----------------------------------------------------------------------------------------------------------------------
 class Data:
     def __init__(self, constants):
@@ -29,11 +32,18 @@ class Data:
         self.files = [constants.filename_EURUSD, constants.filename_GBPUSD, constants.filename_USDCHF]
 
         if constants.end_m is None:
-            self.out_file = constants.file_path + 'training_set_' + str(constants.start_y) + '_' + str(constants.end_y) + '_' + str(
+            if constants.create_scaled == True:
+                self.out_file = constants.file_path + 'training_set_' + str(constants.start_y) + '_' + str(constants.end_y) + '_' + str(
+                constants.start_time) + '_' + str(constants.end_time) + '_Scaled.txt'
+            else:
+                self.out_file = constants.file_path + 'training_set_' + str(constants.start_y) + '_' + str(constants.end_y) + '_' + str(
                 constants.start_time) + '_' + str(constants.end_time) + '.txt'
         else:
-            self.out_file = constants.file_path + 'training_set_' + str(constants.start_y) + '_' + str(constants.end_y) + str(constants.end_m).zfill(2) + '_' + str(
-                constants.start_time) + '_' + str(constants.end_time) + '.txt'
+            if constants.create_scaled == True:
+                self.out_file = constants.file_path + 'training_set_' + str(constants.start_y) + '_' + str(constants.end_y) + str(constants.end_m).zfill(2) + '_' + str(constants.start_time) + '_' + str(constants.end_time) + '_Scaled.txt'
+            else:
+                self.out_file = constants.file_path + 'training_set_' + str(constants.start_y) + '_' + str(constants.end_y) + str(
+                constants.end_m).zfill(2) + '_' + str(constants.start_time) + '_' + str(constants.end_time) + '.txt'
 
         self.EURUSD = {}
         self.GBPUSD = {}
@@ -93,6 +103,7 @@ class Data:
                     if self.constants.start_time <= int((line3[0])[8:14]) <= self.constants.end_time:
                         self.USDCHF.update({line3[0]: line3[1:(len(line3) - 1)]})
 
+        raw = []
         for key in sorted(self.EURUSD):
 
             tmp = key + ',' + str(self.EURUSD.get(key)).rstrip()
@@ -123,30 +134,60 @@ class OneDayRawData:
 def read_data(file):
     raw_data = []
     f = open(file, 'r')
-    countday = 0
     prevday = ''
+    oneDay = None
     for line in f:
         day = line[:8]
-        tmp = line[8:]
+        record = line[8:]
+        tmp = day + ',' + record
         if day == prevday:
-            tmp = str(countday) + ',' + tmp
-            raw_data.append(tmp.split(','))
+            oneDay.add(tmp.split(","))
         else:
-            countday += 1
-            tmp = str(countday) + ',' + tmp
-            raw_data.append(tmp.split(","))
+            if not oneDay == None:
+                raw_data.append(oneDay)
+            oneDay = OneDayRawData()
+            oneDay.add(tmp.split(","))
         prevday = day
     return raw_data
+#-----------------------------------------------------------------------------------------------------------------------
+def scale_data(data):
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    return scaler.fit_transform(data)
 
 #-----------------------------------------------------------------------------------------------------------------------
+def extractCasesfromDay(oneDayRawData, lookback, lookahead):
 
+    if len(oneDayRawData)-lookback - lookahead < 0:
+        return None
 
+    for i in range(0,len(oneDayRawData)-lookback):
+        tmp_x = oneDayRawData[i:i+lookback]
+        tmp_y = calcTarget(oneDayRawData[i+lookback+1:i+lookback+1+lookahead])
+
+    pass
+#-----------------------------------------------------------------------------------------------------------------------
+def calcTarget(current_price, future_series):
+    last_price = future_series[-1:]
+    target = last_price - current_price
+    if target == 0:
+        return target
+
+    for price in future_series:
+        if target > 0:
+            if price < current_price:
+                target = 0
+                break
+        elif target < 0:
+            if price > current_price:
+                target = 0
+                break
+    return target
+#-----------------------------------------------------------------------------------------------------------------------
 #MAIN-------------------------------------------------------------------------------------------------------------------
 data = Data(Constants())
 #data.transform_data_file()
-print(data.get_out_file_name())
-raw_data = read_data(data.get_out_file_name())
+print("File:" + data.get_out_file_name())
+daily_data = read_data(data.get_out_file_name())
+print("Number of days in file: " + str(len(daily_data)))
 
-print(raw_data[1])
-
-pass
+extractCasesfromDay(daily_data[2].data,Constants.lookback,Constants.lookahead)
