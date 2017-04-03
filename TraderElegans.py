@@ -11,39 +11,41 @@ from sklearn.metrics import mean_squared_error
 #CLASSES----------------------------------------------------------------------------------------------------------------
 class Constants:
     #Class Variables (static)
-#    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
-    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
+    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
+#    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
     file_ext = '.csv'
     filename_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     filename_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
     filename_USDCHF = 'DAT_ASCII_USDCHF_M1_'
-    start_y = 2000
+    start_y = 2016
     end_y = 2017
     end_m = 3
     start_time = 80000
     end_time = 120000
+    create_file = False
     create_scaled = False
+    scale_min_max = False
     lookback = 20
     lookahead = 10
 #-----------------------------------------------------------------------------------------------------------------------
 class Data:
-    def __init__(self, constants):
-        self.constants = constants
-        self.files = [constants.filename_EURUSD, constants.filename_GBPUSD, constants.filename_USDCHF]
+    def __init__(self):
+        self.Constants = Constants
+        self.files = [Constants.filename_EURUSD, Constants.filename_GBPUSD, Constants.filename_USDCHF]
 
-        if constants.end_m is None:
-            if constants.create_scaled == True:
-                self.out_file = constants.file_path + 'training_set_' + str(constants.start_y) + '_' + str(constants.end_y) + '_' + str(
-                constants.start_time) + '_' + str(constants.end_time) + '_Scaled.txt'
+        if Constants.end_m is None:
+            if Constants.create_scaled == True:
+                self.out_file = Constants.file_path + 'training_set_' + str(Constants.start_y) + '_' + str(Constants.end_y) + '_' + str(
+                Constants.start_time) + '_' + str(Constants.end_time) + '_Scaled.txt'
             else:
-                self.out_file = constants.file_path + 'training_set_' + str(constants.start_y) + '_' + str(constants.end_y) + '_' + str(
-                constants.start_time) + '_' + str(constants.end_time) + '.txt'
+                self.out_file = Constants.file_path + 'training_set_' + str(Constants.start_y) + '_' + str(Constants.end_y) + '_' + str(
+                Constants.start_time) + '_' + str(Constants.end_time) + '.txt'
         else:
-            if constants.create_scaled == True:
-                self.out_file = constants.file_path + 'training_set_' + str(constants.start_y) + '_' + str(constants.end_y) + str(constants.end_m).zfill(2) + '_' + str(constants.start_time) + '_' + str(constants.end_time) + '_Scaled.txt'
+            if Constants.create_scaled == True:
+                self.out_file = Constants.file_path + 'training_set_' + str(Constants.start_y) + '_' + str(Constants.end_y) + str(Constants.end_m).zfill(2) + '_' + str(Constants.start_time) + '_' + str(Constants.end_time) + '_Scaled.txt'
             else:
-                self.out_file = constants.file_path + 'training_set_' + str(constants.start_y) + '_' + str(constants.end_y) + str(
-                constants.end_m).zfill(2) + '_' + str(constants.start_time) + '_' + str(constants.end_time) + '.txt'
+                self.out_file = Constants.file_path + 'training_set_' + str(Constants.start_y) + '_' + str(Constants.end_y) + str(
+                Constants.end_m).zfill(2) + '_' + str(Constants.start_time) + '_' + str(Constants.end_time) + '.txt'
 
         self.EURUSD = {}
         self.GBPUSD = {}
@@ -54,13 +56,13 @@ class Data:
 
     def transform_data_file(self):
         self.out = open(self.out_file, 'w')
-        for year in range(self.constants.start_y, self.constants.end_y + 1):
+        for year in range(self.Constants.start_y, self.Constants.end_y + 1):
 
-            if year == self.constants.end_y:
-                for month in range(1, self.constants.end_m + 1):
-                    file_EURUSD = self.constants.file_path + self.constants.filename_EURUSD + str(year) + str(month).zfill(2) + self.constants.file_ext
-                    file_GBPUSD = self.constants.file_path + self.constants.filename_GBPUSD + str(year) + str(month).zfill(2) + self.constants.file_ext
-                    file_USDCHF = self.constants.file_path + self.constants.filename_USDCHF + str(year) + str(month).zfill(2) + self.constants.file_ext
+            if year == self.Constants.end_y:
+                for month in range(1, self.Constants.end_m + 1):
+                    file_EURUSD = self.Constants.file_path + self.Constants.filename_EURUSD + str(year) + str(month).zfill(2) + self.Constants.file_ext
+                    file_GBPUSD = self.Constants.file_path + self.Constants.filename_GBPUSD + str(year) + str(month).zfill(2) + self.Constants.file_ext
+                    file_USDCHF = self.Constants.file_path + self.Constants.filename_USDCHF + str(year) + str(month).zfill(2) + self.Constants.file_ext
                     f1 = open(file_EURUSD, 'r')
                     f2 = open(file_GBPUSD, 'r')
                     f3 = open(file_USDCHF, 'r')
@@ -73,17 +75,17 @@ class Data:
                         line2 = line2.split(';')
                         line3 = line3.split(';')
 
-                        if self.constants.start_time <= int((line1[0])[8:14]) <= self.constants.end_time:
+                        if self.Constants.start_time <= int((line1[0])[8:14]) <= self.Constants.end_time:
                             self.EURUSD.update({line1[0]: line1[1:(len(line1) - 1)]})
-                        if self.constants.start_time <= int((line2[0])[8:14]) <= self.constants.end_time:
+                        if self.Constants.start_time <= int((line2[0])[8:14]) <= self.Constants.end_time:
                             self.GBPUSD.update({line2[0]: line2[1:(len(line2) - 1)]})
-                        if self.constants.start_time <= int((line3[0])[8:14]) <= self.constants.end_time:
+                        if self.Constants.start_time <= int((line3[0])[8:14]) <= self.Constants.end_time:
                             self.USDCHF.update({line3[0]: line3[1:(len(line3) - 1)]})
 
             else:
-                file_EURUSD = self.constants.file_path + self.constants.filename_EURUSD + str(year) + self.constants.file_ext
-                file_GBPUSD = self.constants.file_path + self.constants.filename_GBPUSD + str(year) + self.constants.file_ext
-                file_USDCHF = self.constants.file_path + self.constants.filename_USDCHF + str(year) + self.constants.file_ext
+                file_EURUSD = self.Constants.file_path + self.Constants.filename_EURUSD + str(year) + self.Constants.file_ext
+                file_GBPUSD = self.Constants.file_path + self.Constants.filename_GBPUSD + str(year) + self.Constants.file_ext
+                file_USDCHF = self.Constants.file_path + self.Constants.filename_USDCHF + str(year) + self.Constants.file_ext
                 f1 = open(file_EURUSD, 'r')
                 f2 = open(file_GBPUSD, 'r')
                 f3 = open(file_USDCHF, 'r')
@@ -96,11 +98,11 @@ class Data:
                     line2 = line2.split(';')
                     line3 = line3.split(';')
 
-                    if self.constants.start_time <= int((line1[0])[8:14]) <= self.constants.end_time:
+                    if self.Constants.start_time <= int((line1[0])[8:14]) <= self.Constants.end_time:
                         self.EURUSD.update({line1[0]: line1[1:(len(line1) - 1)]})
-                    if self.constants.start_time <= int((line2[0])[8:14]) <= self.constants.end_time:
+                    if self.Constants.start_time <= int((line2[0])[8:14]) <= self.Constants.end_time:
                         self.GBPUSD.update({line2[0]: line2[1:(len(line2) - 1)]})
-                    if self.constants.start_time <= int((line3[0])[8:14]) <= self.constants.end_time:
+                    if self.Constants.start_time <= int((line3[0])[8:14]) <= self.Constants.end_time:
                         self.USDCHF.update({line3[0]: line3[1:(len(line3) - 1)]})
 
         raw = []
@@ -156,38 +158,55 @@ def scale_data(data):
 
 #-----------------------------------------------------------------------------------------------------------------------
 def extractCasesfromDay(oneDayRawData, lookback, lookahead):
-
+    data_x = []
+    data_y = []
+    tmp_x = []
+    tmp_y = []
     if len(oneDayRawData)-lookback - lookahead < 0:
-        return None
+        return None, None
 
-    for i in range(0,len(oneDayRawData)-lookback):
+    for i in range(0,len(oneDayRawData)-lookback-lookahead+1,1):
         tmp_x = oneDayRawData[i:i+lookback]
-        tmp_y = calcTarget(oneDayRawData[i+lookback+1:i+lookback+1+lookahead])
-
-    pass
+        tmp_y = calcTarget(tmp_x[-1][5], oneDayRawData[i+lookback:i+lookback+lookahead])
+        if not (data_x is None or data_y is None):
+            data_x.append(tmp_x)
+            data_y.append(tmp_y)
+    return data_x, data_y
 #-----------------------------------------------------------------------------------------------------------------------
-def calcTarget(current_price, future_series):
-    last_price = future_series[-1:]
-    target = last_price - current_price
+def calcTarget(price_t, future_series):
+    price_tplus10 = float(future_series[-1][5])
+    target = float(price_tplus10) - float(price_t)
     if target == 0:
         return target
 
     for price in future_series:
         if target > 0:
-            if price < current_price:
+            if float(price[5]) < float(price_t):
                 target = 0
                 break
         elif target < 0:
-            if price > current_price:
+            if float(price[5]) > float(price_t):
                 target = 0
                 break
     return target
 #-----------------------------------------------------------------------------------------------------------------------
 #MAIN-------------------------------------------------------------------------------------------------------------------
-data = Data(Constants())
-#data.transform_data_file()
+data = Data()
+if Constants.create_file == True:
+    data.transform_data_file()
 print("File:" + data.get_out_file_name())
 daily_data = read_data(data.get_out_file_name())
 print("Number of days in file: " + str(len(daily_data)))
+data_x = []
+data_y = []
 
-extractCasesfromDay(daily_data[2].data,Constants.lookback,Constants.lookahead)
+#tmp_data_x , tmp_data_y = extractCasesfromDay(daily_data[301].data,Constants.lookback,Constants.lookahead)
+#data_x.append(tmp_data_x)
+#data_y.append(tmp_data_y)
+for day in daily_data:
+    tmp_data_x , tmp_data_y = extractCasesfromDay(day.data,Constants.lookback,Constants.lookahead)
+    if not (tmp_data_x is None or tmp_data_y is None):
+        data_x.append(tmp_data_x)
+        data_y.append(tmp_data_y)
+daily_data = None
+pass
