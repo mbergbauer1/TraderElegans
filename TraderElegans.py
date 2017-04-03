@@ -11,8 +11,8 @@ from sklearn.metrics import mean_squared_error
 #CLASSES----------------------------------------------------------------------------------------------------------------
 class Constants:
     #Class Variables (static)
-    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
-#    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
+#    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
+    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
     file_ext = '.csv'
     filename_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     filename_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
@@ -24,7 +24,7 @@ class Constants:
     end_time = 120000
     create_file = False
     create_scaled = False
-    scale_min_max = False
+    scale_min_max = True
     lookback = 20
     lookahead = 10
 #-----------------------------------------------------------------------------------------------------------------------
@@ -136,26 +136,40 @@ class OneDayRawData:
 def read_data(file):
     raw_data = []
     f = open(file, 'r')
-    prevday = ''
-    oneDay = None
-    for line in f:
-        day = line[:8]
-        record = line[8:]
-        tmp = day + ',' + record
-        if day == prevday:
-            oneDay.add(tmp.split(","))
-        else:
-            if not oneDay == None:
-                raw_data.append(oneDay)
-            oneDay = OneDayRawData()
-            oneDay.add(tmp.split(","))
-        prevday = day
+    raw_date_time = []
+    raw_prices = []
+    if Constants.scale_min_max is True:
+        for line in f:
+            raw = f.readline().split(',')
+            raw_date_time_tmp = raw[0]
+            raw_prices_tmp = raw[1:]
+            raw_date_time.append(raw_date_time_tmp)
+            raw_prices.append(raw_prices_tmp)
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        raw_prices_scaled = scaler.fit_transform(raw_prices)
+        prevday = ''
+        oneDay = None
+        for day_time in raw_date_time:
+            day = day_time[:8]
+            time = day_time[8:]
+            tmp = day+','+time+','+raw_prices_scaled
+#TODO
+    else:
+        prevday = ''
+        oneDay = None
+        for line in f:
+            day = line[:8]
+            record = line[8:]
+            tmp = day + ',' + record
+            if day == prevday:
+                oneDay.add(tmp.split(","))
+            else:
+                if not oneDay == None:
+                    raw_data.append(oneDay)
+                oneDay = OneDayRawData()
+                oneDay.add(tmp.split(","))
+            prevday = day
     return raw_data
-#-----------------------------------------------------------------------------------------------------------------------
-def scale_data(data):
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    return scaler.fit_transform(data)
-
 #-----------------------------------------------------------------------------------------------------------------------
 def extractCasesfromDay(oneDayRawData, lookback, lookahead):
     data_x = []
@@ -200,9 +214,6 @@ print("Number of days in file: " + str(len(daily_data)))
 data_x = []
 data_y = []
 
-#tmp_data_x , tmp_data_y = extractCasesfromDay(daily_data[301].data,Constants.lookback,Constants.lookahead)
-#data_x.append(tmp_data_x)
-#data_y.append(tmp_data_y)
 for day in daily_data:
     tmp_data_x , tmp_data_y = extractCasesfromDay(day.data,Constants.lookback,Constants.lookahead)
     if not (tmp_data_x is None or tmp_data_y is None):
