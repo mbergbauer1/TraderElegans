@@ -17,7 +17,7 @@ class Constants:
     filename_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     filename_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
     filename_USDCHF = 'DAT_ASCII_USDCHF_M1_'
-    start_y = 2016
+    start_y = 2000
     end_y = 2017
     end_m = 3
     start_time = 80000
@@ -151,8 +151,11 @@ def read_data(file):
         prevday = ''
         oneDay = None
         for rdt, rps in zip(raw_date_time, raw_prices_scaled):
-            for elem in rps:
-                line = line +
+
+            line = str(rdt) + ',' + ''.join(str(rps))
+            line = line.replace('[','')
+            line = line.replace(']', '')
+            line = line.replace(' ', '')
             day = line[:8]
             record = line[8:]
             tmp = day + ',' + record
