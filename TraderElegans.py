@@ -11,8 +11,8 @@ from sklearn.metrics import mean_squared_error
 #CLASSES----------------------------------------------------------------------------------------------------------------
 class Constants:
     #Class Variables (static)
-    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
-#    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
+#    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
+    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
     file_ext = '.csv'
     filename_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     filename_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
@@ -138,14 +138,17 @@ def read_data(file):
     f = open(file, 'r')
     raw_date_time = []
     raw_prices = []
-
+    raw_prices_tmp = []
     if Constants.scale_min_max is True:
         for line in f:
             raw = f.readline().split(',')
             raw_date_time_tmp = raw[0]
-            raw_prices_tmp = raw[1:]
+#            raw_prices_tmp = raw[1:]
+            for item in raw[1:]:
+                raw_prices_tmp.append(float(item))
             raw_date_time.append(raw_date_time_tmp)
             raw_prices.append(raw_prices_tmp)
+            del raw_prices_tmp[:]
         scaler = MinMaxScaler(feature_range=(0, 1))
         raw_prices_scaled = scaler.fit_transform(raw_prices).tolist()
         prevday = ''
