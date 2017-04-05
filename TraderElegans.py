@@ -11,8 +11,8 @@ from sklearn.metrics import mean_squared_error
 #CLASSES----------------------------------------------------------------------------------------------------------------
 class Constants:
     #Class Variables (static)
-    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
-#    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
+#    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
+    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
     file_ext = '.csv'
     filename_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     filename_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
@@ -22,7 +22,7 @@ class Constants:
     end_m = 0
     start_time = 80000
     end_time = 120000
-    create_file = False
+    create_file = True
     create_scaled = False
     scale_min_max = True
     lookback = 20
@@ -141,20 +141,17 @@ def read_data(file):
     raw_prices_tmp = []
     if Constants.scale_min_max is True:
         for line in f:
-            raw = f.readline().split(',')
+            raw = line.split(',')
             raw_date_time_tmp = raw[0]
 #            raw_prices_tmp = raw[1:]
             for item in raw[1:]:
                 raw_prices_tmp.append(float(item))
             raw_date_time.append(raw_date_time_tmp)
+            if len(raw_prices_tmp) != 12:
+                print(" WE HAVE A PROBLEM: " + raw)
             raw_prices.append(list(raw_prices_tmp))
             del raw_prices_tmp[:]
-        array = np.array(raw_prices)
-        x = len(raw_prices)
-        y = len(raw_prices[0])
-        array.reshape(x,y)
         scaler = MinMaxScaler(feature_range=(0, 1))
-        scaler.fit_transform(np.array(raw_prices))
         raw_prices_scaled = scaler.fit_transform(np.array(raw_prices)).tolist()
         prevday = ''
         oneDay = None
