@@ -18,8 +18,8 @@ class Constants:
     filename_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
     filename_USDCHF = 'DAT_ASCII_USDCHF_M1_'
     start_y = 2015
-    end_y = 2017
-    end_m = 3
+    end_y = 2016
+    end_m = 0
     start_time = 80000
     end_time = 120000
     create_file = False
@@ -33,7 +33,7 @@ class Data:
         self.Constants = Constants
         self.files = [Constants.filename_EURUSD, Constants.filename_GBPUSD, Constants.filename_USDCHF]
 
-        if Constants.end_m is None:
+        if Constants.end_m == 0:
             if Constants.create_scaled == True:
                 self.out_file = Constants.file_path + 'training_set_' + str(Constants.start_y) + '_' + str(Constants.end_y) + '_' + str(
                 Constants.start_time) + '_' + str(Constants.end_time) + '_Scaled.txt'
