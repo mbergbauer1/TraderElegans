@@ -22,7 +22,7 @@ class Constants:
     end_m = 3
     start_time = 80000
     end_time = 120000
-    create_file = True
+    create_file = False
     create_scaled = False
     scale_min_max = True
     lookback = 20
