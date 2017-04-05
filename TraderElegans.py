@@ -17,9 +17,9 @@ class Constants:
     filename_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     filename_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
     filename_USDCHF = 'DAT_ASCII_USDCHF_M1_'
-    start_y = 2015
-    end_y = 2016
-    end_m = 0
+    start_y = 2000
+    end_y = 2017
+    end_m = 3
     start_time = 80000
     end_time = 120000
     create_file = True
