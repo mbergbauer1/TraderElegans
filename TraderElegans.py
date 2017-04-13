@@ -11,41 +11,44 @@ from sklearn.metrics import mean_squared_error
 #CLASSES----------------------------------------------------------------------------------------------------------------
 class Constants:
     #Class Variables (static)
-#    file_path = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
-    file_path = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
-    file_ext = '.csv'
-    filename_EURUSD = 'DAT_ASCII_EURUSD_M1_'
-    filename_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
-    filename_USDCHF = 'DAT_ASCII_USDCHF_M1_'
-    start_y = 2000
-    end_y = 2017
-    end_m = 3
-    start_time = 80000
-    end_time = 120000
-    create_file = False
-    create_scaled = False
-    scale_min_max = True
-    lookback = 20
-    lookahead = 10
+    FILE_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
+#    FILE_PATH = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
+    FILE_EXT = '.csv'
+    FILENAME_EURUSD = 'DAT_ASCII_EURUSD_M1_'
+    FILENAME_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
+    FILENAME_USDCHF = 'DAT_ASCII_USDCHF_M1_'
+    START_Y = 2016
+    END_Y = 2016
+    END_M = 0
+    START_TIME = 80000
+    END_TIME = 120000
+    CREATE_FILE = False
+    CREATE_SCALED = False
+    SCALE_MIN_MAX = False
+    SCALE_MIN = 0
+    SCALE_MAX = 1
+    LOOKBACK = 20
+    LOOKAHEAD = 10
+    BIP_LONG_SPREAD = 3
+    PIP_SHORT_SPREAD = 3
+    TRAIN_SIZE = 0.9
 #-----------------------------------------------------------------------------------------------------------------------
 class Data:
     def __init__(self):
-        self.Constants = Constants
-        self.files = [Constants.filename_EURUSD, Constants.filename_GBPUSD, Constants.filename_USDCHF]
-
-        if Constants.end_m == 0:
-            if Constants.create_scaled == True:
-                self.out_file = Constants.file_path + 'training_set_' + str(Constants.start_y) + '_' + str(Constants.end_y) + '_' + str(
-                Constants.start_time) + '_' + str(Constants.end_time) + '_Scaled.txt'
+        self.files = [Constants.FILENAME_EURUSD, Constants.FILENAME_GBPUSD, Constants.FILENAME_USDCHF]
+        if Constants.END_M == 0:
+            if Constants.CREATE_SCALED == True:
+                self.out_file = Constants.FILE_PATH + 'training_set_' + str(Constants.START_Y) + '_' + str(Constants.END_Y) + '_' + str(
+                Constants.START_TIME) + '_' + str(Constants.END_TIME) + '_Scaled.txt'
             else:
-                self.out_file = Constants.file_path + 'training_set_' + str(Constants.start_y) + '_' + str(Constants.end_y) + '_' + str(
-                Constants.start_time) + '_' + str(Constants.end_time) + '.txt'
+                self.out_file = Constants.FILE_PATH + 'training_set_' + str(Constants.START_Y) + '_' + str(Constants.END_Y) + '_' + str(
+                Constants.START_TIME) + '_' + str(Constants.END_TIME) + '.txt'
         else:
-            if Constants.create_scaled == True:
-                self.out_file = Constants.file_path + 'training_set_' + str(Constants.start_y) + '_' + str(Constants.end_y) + str(Constants.end_m).zfill(2) + '_' + str(Constants.start_time) + '_' + str(Constants.end_time) + '_Scaled.txt'
+            if Constants.CREATE_SCALED == True:
+                self.out_file = Constants.FILE_PATH + 'training_set_' + str(Constants.START_Y) + '_' + str(Constants.END_Y) + str(Constants.END_M).zfill(2) + '_' + str(Constants.START_TIME) + '_' + str(Constants.END_TIME) + '_Scaled.txt'
             else:
-                self.out_file = Constants.file_path + 'training_set_' + str(Constants.start_y) + '_' + str(Constants.end_y) + str(
-                Constants.end_m).zfill(2) + '_' + str(Constants.start_time) + '_' + str(Constants.end_time) + '.txt'
+                self.out_file = Constants.FILE_PATH + 'training_set_' + str(Constants.START_Y) + '_' + str(Constants.END_Y) + str(
+                Constants.END_M).zfill(2) + '_' + str(Constants.START_TIME) + '_' + str(Constants.END_TIME) + '.txt'
 
         self.EURUSD = {}
         self.GBPUSD = {}
@@ -56,13 +59,39 @@ class Data:
 
     def transform_data_file(self):
         self.out = open(self.out_file, 'w')
-        for year in range(self.Constants.start_y, self.Constants.end_y + 1):
+        for year in range(Constants.START_Y, Constants.END_Y + 1):
 
-            if year == self.Constants.end_y:
-                for month in range(1, self.Constants.end_m + 1):
-                    file_EURUSD = self.Constants.file_path + self.Constants.filename_EURUSD + str(year) + str(month).zfill(2) + self.Constants.file_ext
-                    file_GBPUSD = self.Constants.file_path + self.Constants.filename_GBPUSD + str(year) + str(month).zfill(2) + self.Constants.file_ext
-                    file_USDCHF = self.Constants.file_path + self.Constants.filename_USDCHF + str(year) + str(month).zfill(2) + self.Constants.file_ext
+            if year == Constants.END_Y:
+                if Constants.END_M != 0:
+                    for month in range(1, Constants.END_M + 1):
+                        file_EURUSD = Constants.FILE_PATH + Constants.FILENAME_EURUSD + str(year) + str(month).zfill(2) + Constants.FILE_EXT
+                        file_GBPUSD = Constants.FILE_PATH + Constants.FILENAME_GBPUSD + str(year) + str(month).zfill(2) + Constants.FILE_EXT
+                        file_USDCHF = Constants.FILE_PATH + Constants.FILENAME_USDCHF + str(year) + str(month).zfill(2) + Constants.FILE_EXT
+                        f1 = open(file_EURUSD, 'r')
+                        f2 = open(file_GBPUSD, 'r')
+                        f3 = open(file_USDCHF, 'r')
+
+                        for line1, line2, line3 in zip(f1, f2, f3):
+                            line1 = line1.replace(" ", "")
+                            line2 = line2.replace(" ", "")
+                            line3 = line3.replace(" ", "")
+                            line1 = line1.split(';')
+                            line2 = line2.split(';')
+                            line3 = line3.split(';')
+
+                            if Constants.START_TIME <= int((line1[0])[8:14]) <= Constants.END_TIME:
+                                self.EURUSD.update({line1[0]: line1[1:(len(line1) - 1)]})
+                            if Constants.START_TIME <= int((line2[0])[8:14]) <= Constants.END_TIME:
+                                self.GBPUSD.update({line2[0]: line2[1:(len(line2) - 1)]})
+                            if Constants.START_TIME <= int((line3[0])[8:14]) <= Constants.END_TIME:
+                                self.USDCHF.update({line3[0]: line3[1:(len(line3) - 1)]})
+                else:
+                    file_EURUSD = Constants.FILE_PATH + Constants.FILENAME_EURUSD + str(
+                        year) + Constants.FILE_EXT
+                    file_GBPUSD = Constants.FILE_PATH + Constants.FILENAME_GBPUSD + str(
+                        year) + Constants.FILE_EXT
+                    file_USDCHF = Constants.FILE_PATH + Constants.FILENAME_USDCHF + str(
+                        year) + Constants.FILE_EXT
                     f1 = open(file_EURUSD, 'r')
                     f2 = open(file_GBPUSD, 'r')
                     f3 = open(file_USDCHF, 'r')
@@ -75,17 +104,16 @@ class Data:
                         line2 = line2.split(';')
                         line3 = line3.split(';')
 
-                        if self.Constants.start_time <= int((line1[0])[8:14]) <= self.Constants.end_time:
+                        if Constants.START_TIME <= int((line1[0])[8:14]) <= Constants.END_TIME:
                             self.EURUSD.update({line1[0]: line1[1:(len(line1) - 1)]})
-                        if self.Constants.start_time <= int((line2[0])[8:14]) <= self.Constants.end_time:
+                        if Constants.START_TIME <= int((line2[0])[8:14]) <= Constants.END_TIME:
                             self.GBPUSD.update({line2[0]: line2[1:(len(line2) - 1)]})
-                        if self.Constants.start_time <= int((line3[0])[8:14]) <= self.Constants.end_time:
+                        if Constants.START_TIME <= int((line3[0])[8:14]) <= Constants.END_TIME:
                             self.USDCHF.update({line3[0]: line3[1:(len(line3) - 1)]})
-
             else:
-                file_EURUSD = self.Constants.file_path + self.Constants.filename_EURUSD + str(year) + self.Constants.file_ext
-                file_GBPUSD = self.Constants.file_path + self.Constants.filename_GBPUSD + str(year) + self.Constants.file_ext
-                file_USDCHF = self.Constants.file_path + self.Constants.filename_USDCHF + str(year) + self.Constants.file_ext
+                file_EURUSD = Constants.FILE_PATH + Constants.FILENAME_EURUSD + str(year) + Constants.FILE_EXT
+                file_GBPUSD = Constants.FILE_PATH + Constants.FILENAME_GBPUSD + str(year) + Constants.FILE_EXT
+                file_USDCHF = Constants.FILE_PATH + Constants.FILENAME_USDCHF + str(year) + Constants.FILE_EXT
                 f1 = open(file_EURUSD, 'r')
                 f2 = open(file_GBPUSD, 'r')
                 f3 = open(file_USDCHF, 'r')
@@ -98,11 +126,11 @@ class Data:
                     line2 = line2.split(';')
                     line3 = line3.split(';')
 
-                    if self.Constants.start_time <= int((line1[0])[8:14]) <= self.Constants.end_time:
+                    if Constants.START_TIME <= int((line1[0])[8:14]) <= Constants.END_TIME:
                         self.EURUSD.update({line1[0]: line1[1:(len(line1) - 1)]})
-                    if self.Constants.start_time <= int((line2[0])[8:14]) <= self.Constants.end_time:
+                    if Constants.START_TIME <= int((line2[0])[8:14]) <= Constants.END_TIME:
                         self.GBPUSD.update({line2[0]: line2[1:(len(line2) - 1)]})
-                    if self.Constants.start_time <= int((line3[0])[8:14]) <= self.Constants.end_time:
+                    if Constants.START_TIME <= int((line3[0])[8:14]) <= Constants.END_TIME:
                         self.USDCHF.update({line3[0]: line3[1:(len(line3) - 1)]})
 
         raw = []
@@ -139,7 +167,7 @@ def read_data(file):
     raw_date_time = []
     raw_prices = []
     raw_prices_tmp = []
-    if Constants.scale_min_max is True:
+    if Constants.SCALE_MIN_MAX is True:
         for line in f:
             raw = line.split(',')
             raw_date_time_tmp = raw[0]
@@ -151,7 +179,7 @@ def read_data(file):
                 print(" WE HAVE A PROBLEM: " + raw)
             raw_prices.append(list(raw_prices_tmp))
             del raw_prices_tmp[:]
-        scaler = MinMaxScaler(feature_range=(0, 1))
+        scaler = MinMaxScaler(feature_range=(Constants.SCALE_MIN, Constants.SCALE_MAX))
         raw_prices_scaled = scaler.fit_transform(np.array(raw_prices)).tolist()
         prevday = ''
         oneDay = None
@@ -190,20 +218,51 @@ def read_data(file):
             prevday = day
         return raw_data
 #-----------------------------------------------------------------------------------------------------------------------
-def extractCasesfromDay(oneDayRawData, lookback, lookahead):
+def get_train_test_data(all_days):
+
+    all_cases_x = []
+    all_cases_y = []
+    all_cases_x_tmp = []
+    all_cases_y_tmp = []
+    train_x = []
+    train_y = []
+    test_x = []
+    test_y = []
+    no_train = 0
+    no_test = 0
+    for day in all_days:
+        all_cases_x_tmp, all_cases_y_tmp = extractCasesfromDay(day.data)
+        if not (all_cases_x_tmp is None or all_cases_y_tmp is None):
+            for case_x, case_y in zip(all_cases_x_tmp, all_cases_y_tmp):
+                all_cases_x.append(case_x)
+                all_cases_y.append(case_y)
+
+    no_train = int(Constants.TRAIN_SIZE * len(all_cases_x))
+    no_test = len(all_cases_x) - no_train
+    train_x = all_cases_x[:no_train]
+    train_y = all_cases_y[:no_train]
+    test_x = all_cases_x[no_train:]
+    test_y = all_cases_y[no_train:]
+    return train_x, train_y, test_x, test_y
+
+#-----------------------------------------------------------------------------------------------------------------------
+def extractCasesfromDay(oneDayRawData):
     data_x = []
     data_y = []
     tmp_x = []
     tmp_y = []
-    if len(oneDayRawData)-lookback - lookahead < 0:
+    if len(oneDayRawData)-Constants.LOOKBACK - Constants.LOOKAHEAD < 0:
         return None, None
 
-    for i in range(0,len(oneDayRawData)-lookback-lookahead+1,1):
-        tmp_x = oneDayRawData[i:i+lookback]
-        tmp_y = calcTarget(tmp_x[-1][5], oneDayRawData[i+lookback:i+lookback+lookahead])
+    for i in range(0,len(oneDayRawData)-Constants.LOOKBACK-Constants.LOOKAHEAD+1,1):
+        tmp_x = oneDayRawData[i:i+Constants.LOOKBACK]
+        tmp_y = calcTarget(tmp_x[-1][5], oneDayRawData[i+Constants.LOOKBACK:i+Constants.LOOKBACK+Constants.LOOKAHEAD])
         if not (data_x is None or data_y is None):
             data_x.append(tmp_x)
             data_y.append(tmp_y)
+    if (len(data_x) != len(data_y)):
+        print("numbe of cases not equal for data_x and data_y for one day!")
+        exit()
     return data_x, data_y
 #-----------------------------------------------------------------------------------------------------------------------
 def calcTarget(price_t, future_series):
@@ -223,20 +282,43 @@ def calcTarget(price_t, future_series):
                 break
     return target
 #-----------------------------------------------------------------------------------------------------------------------
+def numpy_reshape(cases):
+
+    tmp_all_cases = []
+    tmp_float = []
+    for case in cases:
+        tmp_case = []
+        for timestep in case:
+            tmp_float = [float(item) for item in timestep[2:]]
+            tmp_case.append(list(tmp_float))
+        tmp_all_cases.append(list(tmp_case))
+
+
+    tmp = np.array(tmp_all_cases, np.float16)
+    tmp.reshape(len(tmp_all_cases), len(tmp_all_cases[0]), len(tmp_all_cases[0][0]))
+    return tmp
+
+
+
+#-----------------------------------------------------------------------------------------------------------------------
 #MAIN-------------------------------------------------------------------------------------------------------------------
 data = Data()
-if Constants.create_file == True:
+if Constants.CREATE_FILE == True:
     data.transform_data_file()
-print("File:" + data.get_out_file_name())
-daily_data = read_data(data.get_out_file_name())
-print("Number of days in file: " + str(len(daily_data)))
-data_x = []
-data_y = []
+#print("File:" + data.get_out_file_name())
+#daily_data = read_data(data.get_out_file_name())
+#print("Number of days in file: " + str(len(daily_data)))
+train_x = []
+train_y = []
+test_x = []
+test_y = []
 
-for day in daily_data:
-    tmp_data_x , tmp_data_y = extractCasesfromDay(day.data,Constants.lookback,Constants.lookahead)
-    if not (tmp_data_x is None or tmp_data_y is None):
-        data_x.append(tmp_data_x)
-        data_y.append(tmp_data_y)
-daily_data = None
+train_x, train_y, test_x, test_y = get_train_test_data(read_data(data.get_out_file_name()))
+print('train_x: ' + str(len(train_x))+'\n')
+print('train_y: ' + str(len(train_y))+'\n')
+print('test_x: ' + str(len(test_x))+'\n')
+print('test_y: ' + str(len(test_y))+'\n')
+
+train_x = numpy_reshape(train_x)
+
 pass
