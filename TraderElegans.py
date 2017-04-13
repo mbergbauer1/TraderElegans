@@ -32,6 +32,7 @@ class Constants:
     BIP_LONG_SPREAD = 3
     PIP_SHORT_SPREAD = 3
     TRAIN_SIZE = 0.9
+    ONE_PIP = 10000
 #-----------------------------------------------------------------------------------------------------------------------
 class Data:
     def __init__(self):
@@ -280,7 +281,10 @@ def calcTarget(price_t, future_series):
             if float(price[5]) > float(price_t):
                 target = 0
                 break
-    return target
+    if not (Constants.SCALE_MIN_MAX):
+        return round((target*Constants.ONE_PIP),1)
+    else:
+        return target
 #-----------------------------------------------------------------------------------------------------------------------
 def numpy_reshape(cases):
 
@@ -318,7 +322,8 @@ print('train_x: ' + str(len(train_x))+'\n')
 print('train_y: ' + str(len(train_y))+'\n')
 print('test_x: ' + str(len(test_x))+'\n')
 print('test_y: ' + str(len(test_y))+'\n')
-
 train_x = numpy_reshape(train_x)
+test_x = numpy_reshape(test_x)
+
 
 pass
