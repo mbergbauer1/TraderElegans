@@ -228,7 +228,6 @@ def get_train_test_data(all_days):
     test_x = all_cases_x[no_train:]
     test_y = all_cases_y[no_train:]
     return train_x, train_y, test_x, test_y
-
 #-----------------------------------------------------------------------------------------------------------------------
 def extractCasesfromDay(oneDayRawData):
     data_x = []
@@ -237,7 +236,6 @@ def extractCasesfromDay(oneDayRawData):
     tmp_y = []
     if len(oneDayRawData)-Constants.LOOKBACK - Constants.LOOKAHEAD < 0:
         return None, None
-
     for i in range(0,len(oneDayRawData)-Constants.LOOKBACK-Constants.LOOKAHEAD+1,1):
         tmp_x = oneDayRawData[i:i+Constants.LOOKBACK]
         tmp_y = calcTarget(tmp_x[-1][5], oneDayRawData[i+Constants.LOOKBACK:i+Constants.LOOKBACK+Constants.LOOKAHEAD])
@@ -254,7 +252,6 @@ def calcTarget(price_t, future_series):
     target = float(price_tplus10) - float(price_t)
     if target == 0:
         return target
-
     for price in future_series:
         if target > 0:
             if float(price[5]) < float(price_t):
@@ -270,7 +267,6 @@ def calcTarget(price_t, future_series):
         return target
 #-----------------------------------------------------------------------------------------------------------------------
 def numpy_reshape(cases):
-
     tmp_all_cases = []
     tmp_float = []
     for case in cases:
