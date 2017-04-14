@@ -6,8 +6,6 @@ from keras.layers import Dense
 from keras.layers import LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
-
-
 #CLASSES----------------------------------------------------------------------------------------------------------------
 class Constants:
     #Class Variables (static)
@@ -17,12 +15,12 @@ class Constants:
     FILENAME_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     FILENAME_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
     FILENAME_USDCHF = 'DAT_ASCII_USDCHF_M1_'
-    START_Y = 2016
-    END_Y = 2016
-    END_M = 0
+    START_Y = 2000
+    END_Y = 2017
+    END_M = 3
     START_TIME = 80000
     END_TIME = 120000
-    CREATE_FILE = False
+    CREATE_FILE = True
     CREATE_SCALED = False
     SCALE_MIN_MAX = False
     SCALE_MIN = 0
@@ -50,18 +48,14 @@ class Data:
             else:
                 self.out_file = Constants.FILE_PATH + 'training_set_' + str(Constants.START_Y) + '_' + str(Constants.END_Y) + str(
                 Constants.END_M).zfill(2) + '_' + str(Constants.START_TIME) + '_' + str(Constants.END_TIME) + '.txt'
-
         self.EURUSD = {}
         self.GBPUSD = {}
         self.USDCHF = {}
-
     def get_out_file_name(self):
         return self.out_file
-
     def transform_data_file(self):
         self.out = open(self.out_file, 'w')
         for year in range(Constants.START_Y, Constants.END_Y + 1):
-
             if year == Constants.END_Y:
                 if Constants.END_M != 0:
                     for month in range(1, Constants.END_M + 1):
@@ -71,7 +65,6 @@ class Data:
                         f1 = open(file_EURUSD, 'r')
                         f2 = open(file_GBPUSD, 'r')
                         f3 = open(file_USDCHF, 'r')
-
                         for line1, line2, line3 in zip(f1, f2, f3):
                             line1 = line1.replace(" ", "")
                             line2 = line2.replace(" ", "")
@@ -79,7 +72,6 @@ class Data:
                             line1 = line1.split(';')
                             line2 = line2.split(';')
                             line3 = line3.split(';')
-
                             if Constants.START_TIME <= int((line1[0])[8:14]) <= Constants.END_TIME:
                                 self.EURUSD.update({line1[0]: line1[1:(len(line1) - 1)]})
                             if Constants.START_TIME <= int((line2[0])[8:14]) <= Constants.END_TIME:
@@ -96,7 +88,6 @@ class Data:
                     f1 = open(file_EURUSD, 'r')
                     f2 = open(file_GBPUSD, 'r')
                     f3 = open(file_USDCHF, 'r')
-
                     for line1, line2, line3 in zip(f1, f2, f3):
                         line1 = line1.replace(" ", "")
                         line2 = line2.replace(" ", "")
@@ -104,7 +95,6 @@ class Data:
                         line1 = line1.split(';')
                         line2 = line2.split(';')
                         line3 = line3.split(';')
-
                         if Constants.START_TIME <= int((line1[0])[8:14]) <= Constants.END_TIME:
                             self.EURUSD.update({line1[0]: line1[1:(len(line1) - 1)]})
                         if Constants.START_TIME <= int((line2[0])[8:14]) <= Constants.END_TIME:
@@ -118,7 +108,6 @@ class Data:
                 f1 = open(file_EURUSD, 'r')
                 f2 = open(file_GBPUSD, 'r')
                 f3 = open(file_USDCHF, 'r')
-
                 for line1, line2, line3 in zip(f1, f2, f3):
                     line1 = line1.replace(" ", "")
                     line2 = line2.replace(" ", "")
@@ -126,17 +115,14 @@ class Data:
                     line1 = line1.split(';')
                     line2 = line2.split(';')
                     line3 = line3.split(';')
-
                     if Constants.START_TIME <= int((line1[0])[8:14]) <= Constants.END_TIME:
                         self.EURUSD.update({line1[0]: line1[1:(len(line1) - 1)]})
                     if Constants.START_TIME <= int((line2[0])[8:14]) <= Constants.END_TIME:
                         self.GBPUSD.update({line2[0]: line2[1:(len(line2) - 1)]})
                     if Constants.START_TIME <= int((line3[0])[8:14]) <= Constants.END_TIME:
                         self.USDCHF.update({line3[0]: line3[1:(len(line3) - 1)]})
-
         raw = []
         for key in sorted(self.EURUSD):
-
             tmp = key + ',' + str(self.EURUSD.get(key)).rstrip()
             if key in self.GBPUSD:
                 tmp = tmp + ',' + str(self.GBPUSD.get(key)).rstrip()
@@ -185,7 +171,6 @@ def read_data(file):
         prevday = ''
         oneDay = None
         for rdt, rps in zip(raw_date_time, raw_prices_scaled):
-
             line = str(rdt) + ',' + ''.join(str(rps))
             line = line.replace('[','')
             line = line.replace(']', '')
@@ -220,7 +205,6 @@ def read_data(file):
         return raw_data
 #-----------------------------------------------------------------------------------------------------------------------
 def get_train_test_data(all_days):
-
     all_cases_x = []
     all_cases_y = []
     all_cases_x_tmp = []
@@ -237,7 +221,6 @@ def get_train_test_data(all_days):
             for case_x, case_y in zip(all_cases_x_tmp, all_cases_y_tmp):
                 all_cases_x.append(case_x)
                 all_cases_y.append(case_y)
-
     no_train = int(Constants.TRAIN_SIZE * len(all_cases_x))
     no_test = len(all_cases_x) - no_train
     train_x = all_cases_x[:no_train]
@@ -296,14 +279,9 @@ def numpy_reshape(cases):
             tmp_float = [float(item) for item in timestep[2:]]
             tmp_case.append(list(tmp_float))
         tmp_all_cases.append(list(tmp_case))
-
-
     tmp = np.array(tmp_all_cases, np.float16)
     tmp.reshape(len(tmp_all_cases), len(tmp_all_cases[0]), len(tmp_all_cases[0][0]))
     return tmp
-
-
-
 #-----------------------------------------------------------------------------------------------------------------------
 #MAIN-------------------------------------------------------------------------------------------------------------------
 data = Data()
