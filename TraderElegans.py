@@ -1,4 +1,4 @@
-
+import sys
 import numpy as np
 import math
 from keras.models import Sequential
@@ -15,21 +15,22 @@ class Constants:
     FILENAME_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     FILENAME_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
     FILENAME_USDCHF = 'DAT_ASCII_USDCHF_M1_'
-    START_Y = 2000
+    START_Y = 2016
     END_Y = 2017
     END_M = 3
     START_TIME = 80000
     END_TIME = 120000
-    CREATE_FILE = True
+    CREATE_FILE = False
     CREATE_SCALED = False
     SCALE_MIN_MAX = False
     SCALE_MIN = 0
     SCALE_MAX = 1
     LOOKBACK = 20
     LOOKAHEAD = 10
+    FEATURES = 12
     BIP_LONG_SPREAD = 3
     PIP_SHORT_SPREAD = 3
-    TRAIN_SIZE = 0.9
+    TRAIN_SIZE = 0.8
     ONE_PIP = 10000
 #-----------------------------------------------------------------------------------------------------------------------
 class Data:
@@ -269,7 +270,10 @@ def calcTarget(price_t, future_series):
 def numpy_reshape(cases):
     tmp_all_cases = []
     tmp_float = []
+    count = 0
     for case in cases:
+#        count+=1
+#        print("Convert cases: "+str(count)+'/'+str(len(cases)))
         tmp_case = []
         for timestep in case:
             tmp_float = [float(item) for item in timestep[2:]]
@@ -283,21 +287,26 @@ def numpy_reshape(cases):
 data = Data()
 if Constants.CREATE_FILE == True:
     data.transform_data_file()
-#print("File:" + data.get_out_file_name())
-#daily_data = read_data(data.get_out_file_name())
-#print("Number of days in file: " + str(len(daily_data)))
 train_x = []
 train_y = []
 test_x = []
 test_y = []
-
+print("Reading raw data...")
 train_x, train_y, test_x, test_y = get_train_test_data(read_data(data.get_out_file_name()))
-print('train_x: ' + str(len(train_x))+'\n')
-print('train_y: ' + str(len(train_y))+'\n')
-print('test_x: ' + str(len(test_x))+'\n')
-print('test_y: ' + str(len(test_y))+'\n')
+print('train_x: ' + str(len(train_x)))
+print('train_y: ' + str(len(train_y)))
+print('test_x: ' + str(len(test_x)))
+print('test_y: ' + str(len(test_y)))
+print("Reshaping train_x...")
 train_x = numpy_reshape(train_x)
+print("Reshaping test_x...")
 test_x = numpy_reshape(test_x)
 
+
+model = Sequential()
+model.add(LSTM(12, input_shape=(Constants.LOOKBACK, Constants.FEATURES)))
+model.add(Dense(1))
+model.compile(loss='mean_squared_error', optimizer='adam',metrics=['accuracy'])
+model.fit(train_x, train_y, nb_epoch=10, batch_size=1, verbose=2)
 
 pass
