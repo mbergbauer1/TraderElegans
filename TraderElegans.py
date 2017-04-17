@@ -304,9 +304,9 @@ test_x = numpy_reshape(test_x)
 
 
 model = Sequential()
-model.add(LSTM(12, input_shape=(Constants.LOOKBACK, Constants.FEATURES)))
+model.add(LSTM(48, input_shape=(Constants.LOOKBACK, Constants.FEATURES)))
 model.add(Dense(1))
 model.compile(loss='mean_squared_error', optimizer='adam',metrics=['accuracy'])
-model.fit(train_x, train_y, nb_epoch=10, batch_size=1, verbose=2)
+model.fit(train_x, train_y, epochs=10, batch_size=1, verbose=2)
 
 pass
