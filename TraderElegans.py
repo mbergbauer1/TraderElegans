@@ -32,6 +32,7 @@ class Constants:
     PIP_SHORT_SPREAD = 3
     TRAIN_SIZE = 0.8
     ONE_PIP = 10000
+    RANDOM_SEED = 99
 #-----------------------------------------------------------------------------------------------------------------------
 class Data:
     def __init__(self):
@@ -302,11 +303,17 @@ train_x = numpy_reshape(train_x)
 print("Reshaping test_x...")
 test_x = numpy_reshape(test_x)
 
-
+np.random.seed(Constants.RANDOM_SEED)
 model = Sequential()
-model.add(LSTM(48, input_shape=(Constants.LOOKBACK, Constants.FEATURES)))
+model.add(LSTM(2000,return_sequences=False, input_shape=(Constants.LOOKBACK, Constants.FEATURES)))
+#model.add(LSTM(120))
+model.add(Dense(5000, activation='relu'))
+model.add(Dense(1000, activation='relu'))
 model.add(Dense(1))
-model.compile(loss='mean_squared_error', optimizer='adam',metrics=['accuracy'])
-model.fit(train_x, train_y, epochs=10, batch_size=1, verbose=2)
+model.compile(loss='mean_squared_error', optimizer='adam',metrics=['acc'])
+print(model.summary())
+model.fit(train_x, train_y, validation_data=(test_x, test_y), epochs=100, batch_size=10, verbose=1)
+scores = model.evaluate(X_test, y_test, verbose=0)
+print("Accuracy: %.2f%%" % (scores[1]*100))
 
 pass
