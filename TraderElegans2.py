@@ -34,6 +34,10 @@ class Constants:
     ONE_PIP = 10000
     RANDOM_SEED = 99
     BATCH_SIZE = 1
+    TREND_TRESHOLD = 4
+    LABEL_LONGTREND = 2
+    LABEL_SHORTTREND = 1
+    LABEL_NOTREND = 0
 #-----------------------------------------------------------------------------------------------------------------------
 class Data:
     def __init__(self):
@@ -244,11 +248,21 @@ def extractCasesfromDay(oneDayRawData):
         tmp_y = calcTarget(tmp_x[-1][5], oneDayRawData[i+Constants.LOOKBACK:i+Constants.LOOKBACK+Constants.LOOKAHEAD])
         if not (data_x is None or data_y is None):
             data_x.append(tmp_x)
-            data_y.append(tmp_y)
+            data_y.append(get_y_categories(tmp_y))
     if (len(data_x) != len(data_y)):
         print("numbe of cases not equal for data_x and data_y for one day!")
         exit()
     return data_x, data_y
+#-----------------------------------------------------------------------------------------------------------------------
+def get_y_categories(y):
+    return_y = []
+    if abs(y) >= Constants.TREND_TRESHOLD:
+        if y > 0:
+            return [f(1),f(0),f(0)]
+        else:
+            return [f(0),f(1),f(0)]
+    else:
+        return [f(0),f(0),f(1)]
 #-----------------------------------------------------------------------------------------------------------------------
 def calcTarget(price_t, future_series):
     price_tplus10 = float(future_series[-1][5])
@@ -293,6 +307,7 @@ train_x = []
 train_y = []
 test_x = []
 test_y = []
+
 print("Reading raw data...")
 train_x, train_y, test_x, test_y = get_train_test_data(read_data(data.get_out_file_name()))
 print('train_x: ' + str(len(train_x)))
