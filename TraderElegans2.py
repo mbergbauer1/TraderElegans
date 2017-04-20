@@ -258,11 +258,11 @@ def get_y_categories(y):
     return_y = []
     if abs(y) >= Constants.TREND_TRESHOLD:
         if y > 0:
-            return [f(1),f(0),f(0)]
+            return [float(1),float(0),float(0)]
         else:
-            return [f(0),f(1),f(0)]
+            return [float(0),float(1),float(0)]
     else:
-        return [f(0),f(0),f(1)]
+        return [float(0),float(0),float(1)]
 #-----------------------------------------------------------------------------------------------------------------------
 def calcTarget(price_t, future_series):
     price_tplus10 = float(future_series[-1][5])
@@ -316,25 +316,27 @@ print('test_x: ' + str(len(test_x)))
 print('test_y: ' + str(len(test_y)))
 print("Reshaping train_x...")
 train_x = numpy_reshape(train_x)
+train_y = np.array(train_y,np.float16).reshape(len(train_y),len(train_y[0]))
 print("Reshaping test_x...")
 test_x = numpy_reshape(test_x)
+test_y = np.array(test_y,np.float16).reshape(len(test_y),len(test_y[0]))
 
 np.random.seed(Constants.RANDOM_SEED)
 model = Sequential()
 
-model.add(LSTM(units = 48 , return_sequences=True, batch_input_shape=(Constants.BATCH_SIZE,Constants.LOOKBACK, Constants.FEATURES), stateful=True))
-model.add(LSTM(units = 24, return_sequences=False))
+model.add(LSTM(units = 24 , return_sequences=True, batch_input_shape=(Constants.BATCH_SIZE,Constants.LOOKBACK, Constants.FEATURES), stateful=True))
+model.add(LSTM(units = 12, return_sequences=False))
 #model.add(LSTM(units= 48, return_sequences=False))
 #model.add(Dense(48))
 #model.add(Dense(24))
-model.add(Dense(12))
-model.add(Dense(1))
-model.compile(loss='mean_squared_error', optimizer='Adam',metrics=['acc'])
+#model.add(Dense(12))
+model.add(Dense(3,activation='sigmoid'))
+model.compile(loss='categorical_crossentropy', optimizer='Adam',metrics=['acc'])
 print(model.summary())
 
 for i in range(100):
     model.fit(train_x, train_y, validation_data=(test_x, test_y), epochs=1, batch_size=Constants.BATCH_SIZE, verbose=1,shuffle=False)
-    scores = model.evaluate(test_x, test_y, verbose=1)
+#    scores = model.evaluate(test_x, test_y, verbose=1)
     model.reset_states()
 
 #model.fit(train_x, train_y, validation_data=(test_x, test_y), epochs=1, batch_size=Constants.BATCH_SIZE, verbose=1, shuffle = False)
