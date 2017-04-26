@@ -27,12 +27,12 @@ class Constants:
     END_TIME = 120000
     CREATE_FILE = True
     #**********SCALE**********
-    SCALE_MIN_MAX = True
+    SCALE_MIN_MAX = False
     SCALE_MIN = 0
     SCALE_MAX = 1
     #**********DATA**********
     LOOKBACK = 20
-    LOOKAHEAD = 10
+    LOOKAHEAD = 20
     FEATURES = 1
     TRAIN_SIZE = 0.8
     VALID_SIZE = 0.1
@@ -182,7 +182,7 @@ def extractCasesfromDay(oneDayRawData):
         exit()
     return data_x, data_y
 #-----------------------------------------------------------------------------------------------------------------------
-def numpy_reshape(cases):
+def numpy_reshape(cases,x_y):
     tmp_all_cases = []
     tmp_float = []
     for case in cases:
@@ -190,9 +190,12 @@ def numpy_reshape(cases):
         for timestep in case:
             tmp_case.append(float(timestep[5]))
         tmp_all_cases.append(list(tmp_case))
-    tmp = np.array(tmp_all_cases).reshape(len(cases),Constants.LOOKBACK,Constants.FEATURES)
-    pass
-    return tmp
+    if x_y == 'x':
+        return np.array(tmp_all_cases).reshape(len(cases),Constants.LOOKBACK,Constants.FEATURES)
+    elif x_y == 'y':
+        return np.array(tmp_all_cases).reshape(len(cases),Constants.LOOKAHEAD,Constants.FEATURES)
+    else:
+        return None
 #-----------------------------------------------------------------------------------------------------------------------
 def scale_input_data(unscaled_input):
     tmp = []
@@ -225,15 +228,15 @@ print('Training cases: ' + str(len(train_x)))
 print('Validation cases: ' + str(len(test_x)))
 print('Prediction cases: ' + str(len(test_x)))
 print("Reshaping Training data...")
-train_x = numpy_reshape(train_x)
-train_y = numpy_reshape(train_y)
+train_x = numpy_reshape(train_x,'x')
+train_y = numpy_reshape(train_y,'y')
 print("Reshaping Test data...")
-test_x = numpy_reshape(test_x)
-test_y = numpy_reshape(test_y)
+test_x = numpy_reshape(test_x,'x')
+test_y = numpy_reshape(test_y,'y')
 print("Reshaping Prediction data...")
-pred_x = numpy_reshape(pred_x)
-pred_y = numpy_reshape(pred_y)
-
+pred_x = numpy_reshape(pred_x,'x')
+pred_y = numpy_reshape(pred_y,'y')
+pass
 if Constants.SCALE_MIN_MAX:
     train_x = scale_input_data(train_x)
     test_x = scale_input_data(test_x)
@@ -247,14 +250,14 @@ np.random.seed(Constants.RANDOM_SEED)
 #model.add(Dense(3,activation='sigmoid'))
 
 model = Sequential()
-model.add(LSTM(units = 12 , return_sequences=False, input_shape=(Constants.BATCH_SIZE,Constants.LOOKBACK,Constants.FEATURES), stateful=False, activation='relu', kernel_initializer='random_uniform'))
+model.add(LSTM(units = 120 , return_sequences=True, batch_input_shape=(53924, Constants.LOOKBACK,Constants.FEATURES), stateful=False))
 #model.add(Dropout(0.2))
 #model.add(LSTM(units = 24, return_sequences=True))
 #model.add(Dropout(0.2))
 #model.add(LSTM(units = 12, return_sequences=False))
 #model.add(Dropout(0.2))
 #model.add(Dense(3,activation='softmax'))
-model.add(TimeDistributed(Dense(Constants.LOOKAHEAD)))
+model.add(TimeDistributed(Dense(1)))
 
 
 print("Compiling model...")
@@ -264,7 +267,7 @@ print(model.summary())
 
 print("Start training...")
 
-model.fit(train_x, train_y, epochs=Constants.EPOCHS, batch_size=Constants.BATCH_SIZE, verbose=2, shuffle=False)
+model.fit(train_x, train_y, epochs=Constants.EPOCHS, batch_size=Constants.BATCH_SIZE, verbose=1, shuffle=False)
 
 #for i in range(Constants.EPOCHS):
 #    print("Epoch: " + str(i+1) + '\n')
@@ -276,12 +279,12 @@ model.fit(train_x, train_y, epochs=Constants.EPOCHS, batch_size=Constants.BATCH_
 
 
 
-val_score = model.evaluate(test_x,test_y, batch_size=1, verbose=2)
-pred_score = model.predict_classes(test_x, batch_size=1,verbose=2)
+val_score = model.evaluate(test_x,test_y, batch_size=1, verbose=1)
+pred_score = model.predict(test_x, batch_size=1,verbose=1)
 
 for evaluation in val_score:
     print(evaluation)
 
-for prediction in pred_score:
-    print(prediction)
+#for prediction in pred_score:
+#    print(prediction)
 

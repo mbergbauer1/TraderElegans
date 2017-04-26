@@ -307,7 +307,7 @@ test_x = numpy_reshape(test_x)
 np.random.seed(Constants.RANDOM_SEED)
 model = Sequential()
 
-model.add(LSTM(units = 48 , return_sequences=True, batch_input_shape=(Constants.BATCH_SIZE,Constants.LOOKBACK, Constants.FEATURES), stateful=True))
+model.add(LSTM(units = 48 , return_sequences=True, batch_input_shape=(len(train_x),Constants.LOOKBACK, Constants.FEATURES), stateful=True))
 model.add(LSTM(units = 24, return_sequences=False))
 #model.add(LSTM(units= 48, return_sequences=False))
 #model.add(Dense(48))

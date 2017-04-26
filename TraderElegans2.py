@@ -32,7 +32,7 @@ class Constants:
     #**********DATA**********
     LOOKBACK = 30
     LOOKAHEAD = 5
-    FEATURES = 12
+    FEATURES = 4
     TRAIN_SIZE = 0.8
     VALID_SIZE = 0.1
     PREDI_SIZE = 0.1
@@ -40,7 +40,7 @@ class Constants:
     RANDOM_SEED = 99
     #**********MODEL**********
     BATCH_SIZE = 10
-    EPOCHS = 10
+    EPOCHS = 2
     TREND_TRESHOLD = 2
     LABEL_LONGTREND = 2
     LABEL_SHORTTREND = 1
@@ -329,7 +329,7 @@ print("Seeding Random number generator")
 np.random.seed(Constants.RANDOM_SEED)
 
 model = Sequential()
-model.add(LSTM(units = 12 , return_sequences=False, batch_input_shape=(Constants.BATCH_SIZE,Constants.LOOKBACK, Constants.FEATURES), stateful=False))
+model.add(LSTM(units = 12 , return_sequences=False, batch_input_shape=(len(train_x),Constants.LOOKBACK, Constants.FEATURES), stateful=False))
 model.add(Dense(3,activation='softmax'))
 
 #model = Sequential()
