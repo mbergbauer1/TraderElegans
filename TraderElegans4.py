@@ -33,6 +33,7 @@ class Constants:
     LOOKBACK = 30
     LOOKAHEAD = 5
     FEATURES = 12
+    PREDICT_CLASS = False
     TRAIN_SIZE = 0.8
     VALID_SIZE = 0.1
     PREDI_SIZE = 0.1
