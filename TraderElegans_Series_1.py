@@ -15,41 +15,36 @@ from keras.layers import TimeDistributed
 class Constants:
     #**********FILE**********
     FILE_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
-#    FILE_PATH = 'C:\\Users\\bergbmi\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
     FILE_EXT = '.csv'
     FILENAME_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     FILENAME_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
     FILENAME_USDCHF = 'DAT_ASCII_USDCHF_M1_'
-    START_Y = 2016
+    START_Y = 2017
     END_Y = 2017
     END_M = 3
     START_TIME = 80000
     END_TIME = 120000
-    CREATE_FILE = True
-    #**********SCALE**********
-    SCALE_MIN_MAX = False
-    SCALE_MIN = 0
-    SCALE_MAX = 1
-    #**********DATA**********
+    CREATE_FILE = False
+    #**********MODEL PARAMS****
+    BATCH_SIZE = 1
+    EPOCHS = 1
     LOOKBACK = 20
     LOOKAHEAD = 20
     FEATURES = 1
+    SCALE_MIN_MAX = True
+    SCALE_MIN = 0
+    SCALE_MAX = 1
     TRAIN_SIZE = 0.8
     VALID_SIZE = 0.1
     PREDI_SIZE = 0.1
     ONE_PIP = 10000
     RANDOM_SEED = 99
-    #**********MODEL**********
-    BATCH_SIZE = 20
-    EPOCHS = 1
-    TREND_TRESHOLD = 4
-    LABEL_LONGTREND = 2
-    LABEL_SHORTTREND = 1
-    LABEL_NOTREND = 0
+    #**********CHECKPOINTING***
     CHECKP = False
+    LOAD_CHECKP = False
     MODEL_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\Checkpoint\\checkpoint_model.hdf5'
     CHECKP_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\Checkpoint\\checkpoint_weights.hdf5'
-    LOAD_CHECKP = False
+
 
 #-----------------------------------------------------------------------------------------------------------------------
 class Data:
@@ -239,8 +234,11 @@ pred_y = numpy_reshape(pred_y,'y')
 pass
 if Constants.SCALE_MIN_MAX:
     train_x = scale_input_data(train_x)
+    train_y = scale_input_data(train_y)
     test_x = scale_input_data(test_x)
+    test_y = scale_input_data(test_y)
     pred_x = scale_input_data(pred_x)
+    pred_y = scale_input_data(pred_y)
 
 print("Seeding Random number generator")
 np.random.seed(Constants.RANDOM_SEED)
@@ -250,7 +248,7 @@ np.random.seed(Constants.RANDOM_SEED)
 #model.add(Dense(3,activation='sigmoid'))
 
 model = Sequential()
-model.add(LSTM(units = 120 , return_sequences=True, batch_input_shape=(len(train_x), Constants.LOOKBACK,Constants.FEATURES), stateful=False))
+model.add(LSTM(units = 24, return_sequences=True, batch_input_shape=(Constants.BATCH_SIZE, Constants.LOOKBACK,Constants.FEATURES), stateful=True))
 #model.add(Dropout(0.2))
 #model.add(LSTM(units = 60, return_sequences=True))
 #model.add(Dropout(0.2))
@@ -260,19 +258,18 @@ model.add(LSTM(units = 120 , return_sequences=True, batch_input_shape=(len(train
 model.add(TimeDistributed(Dense(1)))
 
 print("Compiling model...")
-model.compile(loss='mse', optimizer='adam',metrics=['acc'])
+model.compile(loss='mse', optimizer='rmsprop',metrics=['acc','mae'])
 print(model.summary())
 
 print("Start training...")
-model.fit(train_x, train_y, validation_data=(test_x, test_y), epochs=Constants.EPOCHS, batch_size=Constants.BATCH_SIZE, verbose=1, shuffle=False)
+#model.fit(train_x, train_y, validation_data=(test_x, test_y), epochs=Constants.EPOCHS, batch_size=Constants.BATCH_SIZE, verbose=1, shuffle=False)
 
-#for i in range(Constants.EPOCHS):
-#    print("Epoch: " + str(i+1) + '\n')
-#    if Constants.CHECKP:
-#        model.fit(train_x, train_y, validation_data=(test_x, test_y), callbacks=callbacks_list, epochs=1, batch_size=Constants.BATCH_SIZE, verbose=1, shuffle=False)
-#    else:
-#        model.fit(train_x, train_y, validation_data=(test_x, test_y), epochs=1,batch_size=Constants.BATCH_SIZE, verbose=1, shuffle=False)
-#    model.reset_states()
+for i in range(Constants.EPOCHS):
+    print("Epoch: " + str(i+1) + '\n')
+    model.fit(train_x, train_y, epochs=1,batch_size=Constants.BATCH_SIZE, verbose=1, shuffle=False)
+    model.reset_states()
 
+predicted_output = model.predict(pred_x, batch_size=Constants.BATCH_SIZE)
 
 
+pass
