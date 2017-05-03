@@ -12,6 +12,7 @@ from keras.callbacks import ModelCheckpoint
 from keras.models import model_from_json
 from keras.layers import TimeDistributed
 import matplotlib.pyplot as plt
+import talib
 #CLASSES----------------------------------------------------------------------------------------------------------------
 class Constants:
     #**********FILE**********
@@ -25,7 +26,7 @@ class Constants:
     END_M = 3
     START_TIME = 80000
     END_TIME = 120000
-    CREATE_FILE = False
+    CREATE_FILE = True
     #**********MODEL PARAMS****
     BATCH_SIZE = 1
     EPOCHS = 5
@@ -42,10 +43,10 @@ class Constants:
     RANDOM_SEED = 99
     #**********CHECKPOINTING***
     CHECKP = False
-    LOAD_CHECKP = True
+    LOAD_CHECKP = False
     MODEL_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\Checkpoint\\checkpoint_model.hdf5'
     CHECKP_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\Checkpoint\\checkpoint_weights.hdf5'
-    PLOT = True
+    PLOT = False
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -316,3 +317,12 @@ if Constants.PLOT:
     plot_pred = plot_pred.reshape(plot_pred.size,Constants.FEATURES)
     plot_actual = np.array(plot_actual).reshape(pred_y.size,Constants.FEATURES)
     plot_results(plot_pred,plot_actual)
+
+'''
+5,8,13 min simple moving average
+MACD 12,26,9
+RSI13
+Bollinger Band
+Fibonacci retracement
+ADX
+'''
