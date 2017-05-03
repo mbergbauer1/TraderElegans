@@ -19,19 +19,17 @@ class Constants:
     FILE_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
     FILE_EXT = '.csv'
     FILENAME_EURUSD = 'DAT_ASCII_EURUSD_M1_'
-    FILENAME_GBPUSD = 'DAT_ASCII_GBPUSD_M1_'
-    FILENAME_USDCHF = 'DAT_ASCII_USDCHF_M1_'
     START_Y = 2017
     END_Y = 2017
-    END_M = 3
+    END_M = 4
     START_TIME = 80000
     END_TIME = 120000
     CREATE_FILE = True
     #**********MODEL PARAMS****
     BATCH_SIZE = 1
     EPOCHS = 5
-    LOOKBACK = 20
-    LOOKAHEAD = 20
+    LOOKBACK = 26
+    LOOKAHEAD = 5
     FEATURES = 1
     SCALE_MIN_MAX = True
     SCALE_MIN = 0
@@ -41,6 +39,10 @@ class Constants:
     PREDI_SIZE = 0.1
     ONE_PIP = 10000
     RANDOM_SEED = 99
+    TREND_TRESHOLD = 5
+    LABEL_LONGTREND = [1,0,0]
+    LABEL_SHORTTREND = [0,1,0]
+    LABEL_NOTREND = [0,0,1]
     #**********CHECKPOINTING***
     CHECKP = False
     LOAD_CHECKP = False
@@ -192,14 +194,42 @@ def extractCasesfromDay(oneDayRawData):
         return None, None
     for i in range(0,len(oneDayRawData)-Constants.LOOKBACK-Constants.LOOKAHEAD+1,1):
         tmp_x = oneDayRawData[i:i+Constants.LOOKBACK]
-        tmp_y = oneDayRawData[i+Constants.LOOKBACK:i+Constants.LOOKBACK+Constants.LOOKAHEAD]
+        tmp_y = calcTarget(tmp_x[-1][5], oneDayRawData[i+Constants.LOOKBACK:i+Constants.LOOKBACK+Constants.LOOKAHEAD])
         if not (data_x is None or data_y is None):
             data_x.append(tmp_x)
-            data_y.append(tmp_y)
+            data_y.append(get_y_categories(tmp_y))
     if (len(data_x) != len(data_y)):
         print("numbe of cases not equal for data_x and data_y for one day!")
         exit()
     return data_x, data_y
+#-----------------------------------------------------------------------------------------------------------------------
+def get_y_categories(y):
+    return_y = []
+    a = y * Constants.ONE_PIP
+    if abs(a) >= Constants.TREND_TRESHOLD:
+        if a > 0:
+            return Constants.LABEL_LONGTREND
+        else:
+            return Constants.LABEL_SHORTTREND
+    else:
+        return Constants.LABEL_NOTREND
+#-----------------------------------------------------------------------------------------------------------------------
+def calcTarget(price_t, future_series):
+    price_tplus10 = float(future_series[-1][5])
+    target = float(price_tplus10) - float(price_t)
+    if target == 0:
+        return target
+    for price in future_series:
+        if target > 0:
+            if float(price[5]) < float(price_t):
+                target = 0
+                return target
+        elif target < 0:
+            if float(price[5]) > float(price_t):
+                target = 0
+                return target
+    else:
+        return target
 #-----------------------------------------------------------------------------------------------------------------------
 def numpy_reshape(cases,x_y):
     tmp_all_cases = []
