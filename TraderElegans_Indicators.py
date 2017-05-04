@@ -29,7 +29,7 @@ class Constants:
     BATCH_SIZE = 1
     EPOCHS = 5
     LOOKBACK = 26
-    LOOKAHEAD = 5
+    LOOKAHEAD = 10
     FEATURES = 1
     SCALE_MIN_MAX = True
     SCALE_MIN = 0
@@ -49,8 +49,6 @@ class Constants:
     MODEL_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\Checkpoint\\checkpoint_model.hdf5'
     CHECKP_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\Checkpoint\\checkpoint_weights.hdf5'
     PLOT = False
-
-
 #-----------------------------------------------------------------------------------------------------------------------
 class Data:
     def __init__(self):
@@ -204,7 +202,6 @@ def extractCasesfromDay(oneDayRawData):
     return data_x, data_y
 #-----------------------------------------------------------------------------------------------------------------------
 def get_y_categories(y):
-    return_y = []
     a = y * Constants.ONE_PIP
     if abs(a) >= Constants.TREND_TRESHOLD:
         if a > 0:
@@ -268,6 +265,20 @@ def plot_results_multiple(predicted_data, true_data, prediction_len):
         plt.plot(padding + data, label='Prediction')
         plt.legend()
     plt.show()
+#-----------------------------------------------------------------------------------------------------------------------
+def calc_indicators(data):
+    pass
+
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+
 #MAIN-------------------------------------------------------------------------------------------------------------------
 data = Data()
 if Constants.CREATE_FILE:
