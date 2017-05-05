@@ -292,6 +292,20 @@ pred_y = []
 
 print("Reading raw data...")
 train_x, train_y, test_x, test_y, pred_x, pred_y = get_train_test_data(read_data(data.get_out_file_name()))
+
+
+#todo
+'''
+5,8,13 min simple moving average
+MACD 12,26,9
+RSI13
+Bollinger Band 20,0,2
+Fibonacci retracement
+ADX
+'''
+
+
+
 print("Reshaping Training data...")
 train_x = numpy_reshape(train_x,'x')
 train_y = numpy_reshape(train_y,'y')
@@ -359,11 +373,3 @@ if Constants.PLOT:
     plot_actual = np.array(plot_actual).reshape(pred_y.size,Constants.FEATURES)
     plot_results(plot_pred,plot_actual)
 
-'''
-5,8,13 min simple moving average
-MACD 12,26,9
-RSI13
-Bollinger Band
-Fibonacci retracement
-ADX
-'''
