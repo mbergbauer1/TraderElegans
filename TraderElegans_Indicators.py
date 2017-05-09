@@ -16,7 +16,8 @@ import talib
 #CLASSES----------------------------------------------------------------------------------------------------------------
 class Constants:
     #**********FILE**********
-    FILE_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
+    #FILE_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
+    FILE_PATH = 'C:\\Users\\bergbmi\\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
     FILE_EXT = '.csv'
     FILENAME_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     START_Y = 2017
@@ -24,7 +25,7 @@ class Constants:
     END_M = 4
     START_TIME = 80000
     END_TIME = 120000
-    CREATE_FILE = True
+    CREATE_FILE = False
     #**********MODEL PARAMS****
     BATCH_SIZE = 1
     EPOCHS = 5
@@ -267,8 +268,17 @@ def plot_results_multiple(predicted_data, true_data, prediction_len):
     plt.show()
 #-----------------------------------------------------------------------------------------------------------------------
 def calc_indicators(data):
-    pass
+    for example in data:
+        open = np.array(example)[:,2]
+        high = np.array(example)[:,3]
+        low = np.array(example)[:,4]
+        close = np.array(example)[:,5]
+        pass
 
+
+
+    pass
+    return
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -292,7 +302,7 @@ pred_y = []
 
 print("Reading raw data...")
 train_x, train_y, test_x, test_y, pred_x, pred_y = get_train_test_data(read_data(data.get_out_file_name()))
-
+train_x_indi = calc_indicators(train_x)
 
 #todo
 '''

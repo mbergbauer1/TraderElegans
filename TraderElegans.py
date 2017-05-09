@@ -20,7 +20,7 @@ class Constants:
     END_M = 3
     START_TIME = 80000
     END_TIME = 120000
-    CREATE_FILE = False
+    CREATE_FILE = True
     CREATE_SCALED = False
     SCALE_MIN_MAX = False
     SCALE_MIN = 0
