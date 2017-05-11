@@ -6,7 +6,7 @@ from keras.layers import Dense
 from keras.layers import LSTM
 from keras.layers import GRU
 from keras.layers import Dropout
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error
 from keras.callbacks import ModelCheckpoint
 from keras.models import model_from_json
@@ -29,9 +29,10 @@ class Constants:
     #**********MODEL PARAMS****
     BATCH_SIZE = 1
     EPOCHS = 5
-    LOOKBACK = 26
+    LOOKBACK = 34
+    TIMESTEP = 1
     LOOKAHEAD = 10
-    FEATURES = 1
+    FEATURES = 11
     SCALE_MIN_MAX = True
     SCALE_MIN = 0
     SCALE_MAX = 1
@@ -40,7 +41,7 @@ class Constants:
     PREDI_SIZE = 0.1
     ONE_PIP = 10000
     RANDOM_SEED = 99
-    TREND_TRESHOLD = 5
+    TREND_TRESHOLD = 1
     LABEL_LONGTREND = [1,0,0]
     LABEL_SHORTTREND = [0,1,0]
     LABEL_NOTREND = [0,0,1]
@@ -50,6 +51,16 @@ class Constants:
     MODEL_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\Checkpoint\\checkpoint_model.hdf5'
     CHECKP_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\Checkpoint\\checkpoint_weights.hdf5'
     PLOT = False
+    #**********INDICATORS*****
+    EMA5 = 5
+    EMA8 = 8
+    EMA13 = 13
+    MACD = (12,26,9)
+    RSI = 13
+    BB = (20,2,0)
+    ADX = 14
+
+
 #-----------------------------------------------------------------------------------------------------------------------
 class Data:
     def __init__(self):
@@ -144,7 +155,7 @@ def read_data(file):
     for line in f:
         day = line[:8]
         record = line[8:]
-        tmp = day + ',' + record
+        tmp = day + ',' + record.rstrip()
         if day == prevday:
             oneDay.add(tmp.split(","))
         else:
@@ -268,27 +279,32 @@ def plot_results_multiple(predicted_data, true_data, prediction_len):
     plt.show()
 #-----------------------------------------------------------------------------------------------------------------------
 def calc_indicators(data):
+    tmp = []
     for example in data:
-        open = np.array(example)[:,2]
-        high = np.array(example)[:,3]
-        low = np.array(example)[:,4]
-        close = np.array(example)[:,5]
-        pass
+        open = (np.array(example)[:,2]).astype(float)
+        high = np.array(example)[:,3].astype(float)
+        low = np.array(example)[:,4].astype(float)
+        close = np.array(example)[:,5].astype(float)
 
-
-
-    pass
-    return
-
-
-#-----------------------------------------------------------------------------------------------------------------------
-
-#-----------------------------------------------------------------------------------------------------------------------
-
-
-#-----------------------------------------------------------------------------------------------------------------------
-
-
+        ema5 = talib.EMA(close,timeperiod = Constants.EMA5)[-1]
+        ema8 = talib.EMA(close,timeperiod = Constants.EMA8)[-1]
+        ema13 = talib.EMA(close,timeperiod = Constants.EMA13)[-1]
+        tmp_macd, tmp_macdsignal, tmp_macdhist = talib.MACD(close, fastperiod=Constants.MACD[0], slowperiod=Constants.MACD[1], signalperiod=Constants.MACD[2])
+        macd = tmp_macd[-1]
+        macdsignal = tmp_macdsignal[-1]
+        macdhist = tmp_macdhist[-1]
+        rsi = talib.RSI(close, timeperiod = Constants.RSI)[-1]
+        tmp_upper, tmp_middle, tmp_lower = talib.BBANDS(close, timeperiod=20, nbdevup=2, nbdevdn=2)
+        upper = tmp_upper[-1]
+        middle = tmp_middle[-1]
+        lower = tmp_lower[-1]
+        adx = talib.ADX(high,low,close,Constants.ADX)[-1]
+        last_record = example[-1]
+        date = last_record[0]
+        time = last_record[1]
+        record = str(ema5)+';'+str(ema8)+';'+str(ema13)+';'+str(macd)+';'+str(macdsignal)+';'+str(macdhist)+';'+str(rsi)+';'+str(upper)+';'+str(middle)+';'+str(lower)+';'+str(adx)
+        tmp.append(record.split(';'))
+    return tmp
 #MAIN-------------------------------------------------------------------------------------------------------------------
 data = Data()
 if Constants.CREATE_FILE:
@@ -301,65 +317,55 @@ pred_x = []
 pred_y = []
 
 print("Reading raw data...")
-train_x, train_y, test_x, test_y, pred_x, pred_y = get_train_test_data(read_data(data.get_out_file_name()))
+all_data = read_data(data.get_out_file_name())
+train_x, train_y, test_x, test_y, pred_x, pred_y = get_train_test_data(all_data)
+
+print("Calculating indicators...")
 train_x_indi = calc_indicators(train_x)
+test_x_indi = calc_indicators(test_x)
+pred_x_indi = calc_indicators(pred_x)
+del train_x, test_x, pred_x, all_data
 
-#todo
-'''
-5,8,13 min simple moving average
-MACD 12,26,9
-RSI13
-Bollinger Band 20,0,2
-Fibonacci retracement
-ADX
-'''
-
-
-
-print("Reshaping Training data...")
-train_x = numpy_reshape(train_x,'x')
-train_y = numpy_reshape(train_y,'y')
-print("Reshaping Test data...")
-test_x = numpy_reshape(test_x,'x')
-test_y = numpy_reshape(test_y,'y')
-print("Reshaping Prediction data...")
-pred_x = numpy_reshape(pred_x,'x')
-pred_y = numpy_reshape(pred_y,'y')
-pass
+print("Scaling and reformating...")
 if Constants.SCALE_MIN_MAX:
-    scaler = Scaler()
-    train_x = scaler.scale_input_data(train_x)
-    train_y = scaler.scale_input_data(train_y)
-    test_x = scaler.scale_input_data(test_x)
-    test_y = scaler.scale_input_data(test_y)
-    pred_x = scaler.scale_input_data(pred_x)
-    pred_y = scaler.scale_input_data(pred_y)
+    scaler = StandardScaler()
+    train_x_indi = scaler.fit(train_x_indi).transform(train_x_indi)
+    test_x_indi = scaler.fit(test_x_indi).transform(test_x_indi)
+    pred_x_indi = scaler.fit(pred_x_indi).transform(pred_x_indi)
 
-print("Seeding Random number generator")
+train_x_indi = np.array(train_x_indi).astype(float).reshape(len(train_x_indi),1,Constants.FEATURES)
+test_x_indi = np.array(test_x_indi).astype(float).reshape(len(test_x_indi),1,Constants.FEATURES)
+pred_x_indi = np.array(pred_x_indi).astype(float).reshape(len(pred_x_indi),1,Constants.FEATURES)
+train_y = np.array(train_y)
+test_y = np.array(test_y)
+pred_y = np.array(pred_y)
+
+
+
 np.random.seed(Constants.RANDOM_SEED)
 print('Assembling model...')
 model = Sequential()
-model.add(LSTM(units = 60, return_sequences=True, batch_input_shape=(Constants.BATCH_SIZE, Constants.LOOKBACK,Constants.FEATURES), stateful=True))
+model.add(LSTM(units = 60, return_sequences=True, batch_input_shape=(Constants.BATCH_SIZE, Constants.TIMESTEP,Constants.FEATURES), stateful=True))
 model.add(Dropout(0.2))
-model.add(LSTM(units = 40, return_sequences=True, batch_input_shape=(Constants.BATCH_SIZE, Constants.LOOKBACK,Constants.FEATURES), stateful=True))
+model.add(LSTM(units = 40, return_sequences=True, batch_input_shape=(Constants.BATCH_SIZE, Constants.TIMESTEP,Constants.FEATURES), stateful=True))
 model.add(Dropout(0.2))
-model.add(LSTM(units = 20, return_sequences=True, batch_input_shape=(Constants.BATCH_SIZE, Constants.LOOKBACK,Constants.FEATURES), stateful=True))
-model.add(TimeDistributed(Dense(1)))
+model.add(LSTM(units = 20, return_sequences=False, batch_input_shape=(Constants.BATCH_SIZE, Constants.TIMESTEP,Constants.FEATURES), stateful=True))
+model.add(Dense(3,activation='softmax'))
 
 if Constants.LOAD_CHECKP:
     print("Loading weights from checkpoint file...")
     model.load_weights(Constants.CHECKP_PATH)
 
 print("Compiling model...")
-model.compile(loss='mse', optimizer='rmsprop',metrics=['acc'])
+model.compile(loss='categorical_crossentropy', optimizer='Adam',metrics=['acc'])
 print(model.summary())
-print('Training cases: ' + str(len(train_x)))
-print('Validation cases: ' + str(len(test_x)))
-print('Prediction cases: ' + str(len(test_x)))
+print('Training cases: ' + str(len(train_x_indi)))
+print('Validation cases: ' + str(len(test_x_indi)))
+print('Prediction cases: ' + str(len(pred_x_indi)))
 
 print("Initializing checkpoint...")
 if Constants.CHECKP:
-    checkpoint = ModelCheckpoint(Constants.CHECKP_PATH, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    checkpoint = ModelCheckpoint(Constants.CHECKP_PATH, monitor='val_acc', verbose=2, save_best_only=True, mode='max')
     callbacks_list = [checkpoint]
 
 if not Constants.LOAD_CHECKP:
@@ -367,19 +373,20 @@ if not Constants.LOAD_CHECKP:
     for i in range(Constants.EPOCHS):
         print("Epoch: " + str(i+1) + '\n')
         if Constants.CHECKP:
-            model.fit(train_x, train_y, validation_data=(test_x, test_y), callbacks=callbacks_list, epochs=1, batch_size=Constants.BATCH_SIZE, verbose=1, shuffle=False)
+            model.fit(train_x_indi, train_y, validation_data=(test_x_indi, test_y), callbacks=callbacks_list, epochs=1, batch_size=Constants.BATCH_SIZE, verbose=2, shuffle=False)
         else:
-            model.fit(train_x, train_y, validation_data=(test_x, test_y),epochs=1, batch_size=Constants.BATCH_SIZE, verbose=2, shuffle=False)
+            model.fit(train_x_indi, train_y, validation_data=(test_x_indi, test_y),epochs=1, batch_size=Constants.BATCH_SIZE, verbose=2, shuffle=False)
         model.reset_states()
 
 
-prediction = predict(model,pred_x[140].reshape(1,20,1))
-
-if Constants.PLOT:
-    plot_pred = scaler.descale_input_data(prediction)
-    pred_y=pred_y[140].reshape(1,20,1)
-    plot_actual = scaler.descale_input_data(pred_y)
-    plot_pred = plot_pred.reshape(plot_pred.size,Constants.FEATURES)
-    plot_actual = np.array(plot_actual).reshape(pred_y.size,Constants.FEATURES)
-    plot_results(plot_pred,plot_actual)
+prediction = predict(model,pred_x_indi)
+for x in prediction:
+    print(str(x))
+#if Constants.PLOT:
+#    plot_pred = scaler.descale_input_data(prediction)
+#    pred_y=pred_y[140].reshape(1,20,1)
+#    plot_actual = scaler.descale_input_data(pred_y)
+#    plot_pred = plot_pred.reshape(plot_pred.size,Constants.FEATURES)
+#    plot_actual = np.array(plot_actual).reshape(pred_y.size,Constants.FEATURES)
+#    plot_results(plot_pred,plot_actual)
 
