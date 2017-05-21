@@ -7,6 +7,7 @@ from keras.layers import LSTM
 from keras.layers import GRU
 from keras.layers import Dropout
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from keras.callbacks import ModelCheckpoint
 from keras.models import model_from_json
@@ -16,8 +17,8 @@ import talib
 #CLASSES----------------------------------------------------------------------------------------------------------------
 class Constants:
     #**********FILE**********
-    #FILE_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
-    FILE_PATH = 'C:\\Users\\bergbmi\\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
+    FILE_PATH = 'C:\\Users\\mbergbauer\\Desktop\\NN\\TraderElegans\\CSV_M1\\'
+    #FILE_PATH = 'C:\\Users\\bergbmi\\Desktop\\NN\\TraderElegans\\Data\\M1_Raw\\'
     FILE_EXT = '.csv'
     FILENAME_EURUSD = 'DAT_ASCII_EURUSD_M1_'
     START_Y = 2017
@@ -25,13 +26,13 @@ class Constants:
     END_M = 4
     START_TIME = 80000
     END_TIME = 120000
-    CREATE_FILE = False
+    CREATE_FILE = True
     #**********MODEL PARAMS****
     BATCH_SIZE = 1
     EPOCHS = 5
     LOOKBACK = 34
     TIMESTEP = 1
-    LOOKAHEAD = 10
+    LOOKAHEAD = 20
     FEATURES = 11
     SCALE_MIN_MAX = True
     SCALE_MIN = 0
